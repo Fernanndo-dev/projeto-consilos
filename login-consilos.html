@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login</title>
+</head>
+<body>
+    <form >
+        <h1>CON<span>SILOS</span></h1>
+        <div>
+        <div><label>Usuario</label></div>
+        <input type="text" name="usuario" id="usuario" onchange="validateFields()" placeholder="usuario">
+    </div>
+    <div>
+      <div><label>Senha</label></div>
+        <input type="password" name="password" placeholder="senha">
+    </div>
+    <div>
+        <a href="solicitacao_requisicoes.html"><button type="button">Entrar</button></a>
+    </div>
+    <div>
+      <button type="button">Recuperar Senha</button>
+    </div>
+    </form>
+    
+</body>
+
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color:  #f9f9f9;
+        height: 100vh;
+    }
+
+    button{
+        cursor: pointer;
+        background-color: rgb(12, 9, 9);
+        color: white;
+        transition: all 0.8s;
+    }
+    button:hover{
+       background-color:#8b0000 ;
+       transform: translatex(10px);
+    }
+
+    input, button{
+        outline: none;
+        padding: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: -webkit-fill-available;
+    }
+
+    button[disabled] {
+        
+        opacity: 0.7;
+    }
+    .clear, .solid{
+        background-color: #8b0000;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+
+    }
+    form{
+        width: 300px;
+    }
+
+    h1{
+        display: flex;
+        justify-content: center;
+        font-size: 60px;
+        
+    }
+    span{
+        color: #8b0000;
+    }
+
+   
+        
+    
+</style>
+
+
+
+</html>

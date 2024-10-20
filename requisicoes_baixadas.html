@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisições com Baixa Realizada</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>Requisições com Baixa Realizada</h1>
+  
+
+    <input type="text" id="searchCodigo" placeholder="Buscar por código">
+    <button id="searchBtn">Buscar</button>
+
+   <a href="requisicoes.html"> <button class="voltar" type="button">requisicoes</button></a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>codigo</th>
+                <th>Código produto</th>
+                <th>Nome</th>
+                <th>Data/Hora</th>
+                <th>Transferência</th>
+                <th>Solicitante</th>
+                <th>Responsável</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="baixasBody">
+            <!-- As requisições baixadas aparecerão aqui -->
+        </tbody>
+    </table>
+
+    <!-- Modal para visualizar foto -->
+    <div id="viewPhotoModal" class="modal">
+        <div class="modal-content">
+            <h2>Foto da Requisição</h2>
+            <img id="viewPhoto" alt="Foto da requisição">
+            <button onclick="document.getElementById('viewPhotoModal').style.display='none'">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+
+
+
+        let requisicoesBaixadas = JSON.parse(localStorage.getItem('requisicoesBaixadas')) || [];
+
+        // Função para renderizar a tabela de requisições baixadas
+        function renderizarTabela(requisicoesFiltradas = requisicoesBaixadas) {
+            const tbody = document.getElementById('baixasBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            requisicoesFiltradas.forEach(requisicao => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${requisicao.numero}</td>
+                    <td>${requisicao.codigo}</td>
+                    <td>${requisicao.nome}</td>
+                    <td>${requisicao.dataHora}</td>
+                    <td>${requisicao.transferencia}</td>
+                    <td>${requisicao.solicitante}</td>
+                    <td>${requisicao.responsavel}</td>
+                    <td>
+                        <button onclick="verFoto('${requisicao.foto}')">Ver Foto</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Função para visualizar a foto
+        function verFoto(fotoUrl) {
+            if (fotoUrl) {
+                const viewPhotoModal = document.getElementById('viewPhotoModal');
+                document.getElementById('viewPhoto').src = fotoUrl;
+                viewPhotoModal.style.display = 'block';
+            } else {
+                alert('Nenhuma foto disponível para esta requisição.');
+            }
+        }
+
+        // Função para buscar requisições por código
+        document.getElementById('searchBtn').addEventListener('click', function () {
+            const searchValue = document.getElementById('searchCodigo').value.toLowerCase();
+            const requisicoesFiltradas = requisicoesBaixadas.filter(req =>
+                req.codigo.toLowerCase().includes(searchValue) || req.nome.toLowerCase().includes(searchValue)
+            );
+            renderizarTabela(requisicoesFiltradas);
+        });
+
+        // Inicializar a tabela de requisições baixadas
+        renderizarTabela();
+    </script>
+</body>
+
+<script src="scripts_baixas.js"></script>
+<script src="scripts.js"></script>
+</html>

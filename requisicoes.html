@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisições de Almoxarifado</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Requisições de Almoxarifado</h1>
+
+    <a class="saldo" href="estoque.html"><button>ver estoque</button></a>
+
+    <!-- Botão para ir para a página de Requisições com Baixa Realizada -->
+    <button onclick="window.location.href='requisicoes_baixadas.html'">Ver Requisições com Baixa Realizada</button>
+
+    <!-- Restante do conteúdo da página -->
+    <input type="text" id="searchCodigo" placeholder="Buscar por código ou nome">
+    <button id="searchBtn">Buscar</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Quantidade</th>
+                <th>Saldo</th>
+                <th>Solicitante</th>
+                <th>Data/Hora</th>
+                <th>Transferência</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="requisicoesBody">
+            <!-- As requisições aparecerão aqui -->
+        </tbody>
+    </table>
+
+    <!-- Modal para tirar foto -->
+    <div id="cameraModal" class="modal">
+        <div class="modal-content">
+            <h2>Tirar Foto</h2>
+            <video id="video" width="320" height="240" autoplay></video>
+            <button id="snap">Tirar Foto</button>
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+            <img id="photo" alt="Sua foto aparecerá aqui">
+            <button id="savePhotoBtn">Salvar Foto</button>
+            <button onclick="document.getElementById('cameraModal').style.display='none'">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Baixa -->
+    <div id="baixaModal" class="modal">
+        <div class="modal-content">
+            <h2>Dar Baixa</h2>
+            <label for="responsavel">Responsável:</label>
+            <input type="text" id="responsavel">
+            <button id="confirmBaixaBtn">Confirmar Baixa</button>
+            <button onclick="document.getElementById('baixaModal').style.display='none'">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        let requisicoes = JSON.parse(localStorage.getItem('requisicoes')) || [];
+        let requisicoesBaixadas = JSON.parse(localStorage.getItem('requisicoesBaixadas')) || [];
+        let selectedRequisicao = null;
+
+        // Função para renderizar a tabela de requisições
+        function renderizarTabela(requisicoesFiltradas = requisicoes) {
+            const tbody = document.getElementById('requisicoesBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            requisicoesFiltradas.forEach(requisicao => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${requisicao.numero}</td>
+                    <td>${requisicao.codigo}</td>
+                    <td>${requisicao.nome}</td>
+                    <td>${requisicao.quantidade}</td>
+                    <td>${requisicao.saldo}</td>
+                    <td>${requisicao.solicitante}</td>
+                    <td>${requisicao.dataHora}</td>
+                    <td>${requisicao.transferencia}</td>
+                    <td>${requisicao.status}</td>
+                    <td>
+                        <button onclick="baixarRequisicao(${requisicao.numero})">Dar Baixa</button>
+                        <button onclick="abrirCamera(${requisicao.numero})">Tirar Foto</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Função para abrir a câmera
+        function abrirCamera(numero) {
+            selectedRequisicao = numero;
+            const cameraModal = document.getElementById('cameraModal');
+            cameraModal.style.display = 'block';
+
+            const video = document.getElementById('video');
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream;
+                });
+        }
+
+        // Função para tirar foto
+        document.getElementById('snap').addEventListener('click', function() {
+            const canvas = document.getElementById('canvas');
+            const video = document.getElementById('video');
+            const photo = document.getElementById('photo');
+
+            canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+            const imageData = canvas.toDataURL('image/png');
+            photo.src = imageData;
+            photo.style.display = 'block';
+        });
+
+        // Função para salvar a foto
+        document.getElementById('savePhotoBtn').addEventListener('click', function() {
+            const photo = document.getElementById('photo').src;
+
+            // Atualizar a requisição com a foto
+            const requisicaoIndex = requisicoes.findIndex(req => req.numero === selectedRequisicao);
+            if (requisicaoIndex !== -1) {
+                requisicoes[requisicaoIndex].foto = photo;
+                localStorage.setItem('requisicoes', JSON.stringify(requisicoes));
+            }
+
+            document.getElementById('cameraModal').style.display = 'none';
+            alert('Foto salva com sucesso!');
+        });
+
+        // Função para baixar a requisição
+        function baixarRequisicao(numero) {
+            selectedRequisicao = numero;
+            document.getElementById('baixaModal').style.display = 'block';
+        }
+
+        // Função para confirmar a baixa e atualizar o saldo
+        document.getElementById('confirmBaixaBtn').addEventListener('click', function () {
+            const responsavel = document.getElementById('responsavel').value;
+            if (responsavel) {
+                const requisicaoIndex = requisicoes.findIndex(req => req.numero === selectedRequisicao);
+                if (requisicaoIndex !== -1) {
+                    const requisicao = requisicoes[requisicaoIndex];
+
+                    // Atualizar o saldo do produto ao dar baixa
+                    if (requisicao.saldo >= requisicao.quantidade) {
+                        requisicao.saldo -= requisicao.quantidade;
+                    } else {
+                        alert('Saldo insuficiente para realizar a baixa.');
+                        return;
+                    }
+
+                    requisicao.responsavel = responsavel;
+                    requisicao.status = 'Baixada';
+
+                    // Mover para a lista de requisições baixadas
+                    requisicoesBaixadas.push(requisicao);
+                    requisicoes.splice(requisicaoIndex, 1);
+
+                    localStorage.setItem('requisicoes', JSON.stringify(requisicoes));
+                    localStorage.setItem('requisicoesBaixadas', JSON.stringify(requisicoesBaixadas));
+                    
+                    renderizarTabela();
+                    document.getElementById('baixaModal').style.display = 'none';
+                }
+            }
+        });
+
+        // Função para buscar requisições por código ou nome
+        document.getElementById('searchBtn').addEventListener('click', function () {
+            const searchValue = document.getElementById('searchCodigo').value.toLowerCase();
+            const requisicoesFiltradas = requisicoes.filter(req =>
+                req.codigo.toLowerCase().includes(searchValue) || req.nome.toLowerCase().includes(searchValue)
+            );
+            renderizarTabela(requisicoesFiltradas);
+        });
+
+        // Inicializar a tabela de requisições
+        renderizarTabela();
+    </script>
+</body>
+</html>

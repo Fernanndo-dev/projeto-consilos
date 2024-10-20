@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Requisições</title>
+    
+</head>
+<body>
+    <style>
+        h1{
+            padding-top: 30px;
+            color: #8b0000;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 60px;
+        }
+        body{
+           background-color:#f9f9f9;
+        }
+        form{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+        input{
+            outline: none;
+            height: 20px;
+            width: 200px;
+        }
+
+        button{
+            background: #8b0000;
+            color: white;
+            transition: all 0.5s;
+        }
+
+        button:hover{
+            border-radius: 10px;
+      
+            background-color: darkslategray;
+        }
+
+    </style>
+    <h1>Solicitação de Requisições</h1>
+
+    <form id="requisicaoForm">
+        <label for="codigoProduto">Código do Produto:</label>
+        <input type="text" id="codigoProduto" required><br><br>
+
+        <label for="nomeProduto">Nome do Produto:</label>
+        <input type="text" id="nomeProduto" required><br><br>
+
+        <label for="quantidade">Quantidade Desejada:</label>
+        <input type="number" id="quantidade" required min="1"><br><br>
+
+        <label for="solicitante">Solicitante:</label>
+        <input type="text" id="solicitante" required><br><br>
+
+        <button type="submit">Enviar Requisição</button>
+    </form>
+
+    <script>
+        // Função para enviar a requisição e salvá-la no localStorage
+        document.getElementById('requisicaoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const codigoProduto = document.getElementById('codigoProduto').value;
+            const nomeProduto = document.getElementById('nomeProduto').value;
+            const quantidade = parseInt(document.getElementById('quantidade').value, 10);
+            const solicitante = document.getElementById('solicitante').value;
+
+            // Criar objeto da requisição
+            const novaRequisicao = {
+                numero: Date.now(), // usar timestamp como ID único
+                codigo: codigoProduto,
+                nome: nomeProduto,
+                quantidade,
+                saldo: 100, // Valor inicial padrão de saldo
+                solicitante,
+                dataHora: new Date().toLocaleString(),
+                transferencia: 'Interna',
+                status: 'Pendente'
+            };
+
+            // Adicionar a requisição no localStorage
+            let requisicoes = JSON.parse(localStorage.getItem('requisicoes')) || [];
+            requisicoes.push(novaRequisicao);
+            localStorage.setItem('requisicoes', JSON.stringify(requisicoes));
+
+            // Redirecionar para a página de requisições
+            alert('Requisição enviada com sucesso!');
+            window.location.href = 'requisicoes.html';
+        });
+    </script>
+</body>
+</html>

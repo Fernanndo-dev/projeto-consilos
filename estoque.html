@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        a{
+            text-decoration: none;
+            background-color: #800000;
+            color: white;
+            border: 1px solid #800000;
+            border-radius: 2px;
+            transition: all 0.5s;
+        }
+        a:hover{
+            background-color: #b40f0f;
+            transform: translatex(6px);
+        }
+        h1 {
+            color: #800000; /* Vinho */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #800000; /* Vinho */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Estoque de Produtos</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Código do Produto</th>
+            <th>Produto</th>
+            <th>Saldo Atual F1</th>
+            
+    </thead>
+    <tbody id="tabela-estoque">
+        <th>parafuso 8x20</th>
+        <th>porca m10</th>
+        <th>parafuso 8x20</th>
+        <th>porca m10</th>
+        <th>parafuso 8x20</th>
+        <th>porca m10</th>    
+        <!-- Produtos do estoque serão inseridos aqui -->
+    </tbody>
+</table>
+
+<script>
+    // Estoque inicial dos produtos (mesmo objeto que nas outras páginas)
+    const estoque = {
+        '004337': { nome: 'Parafuso 8x20', saldo : 10000 },
+    '004088': { nome: 'Porca m10', saldo: 50 },
+        '004087': { nome: 'Porca m8', saldo: 75 },
+        '004558': {nome: 'parafuso 10x25',saldo:25000},
+       
+    };
+
+    // Função para carregar o estoque
+    function carregarEstoque() {
+        const tabela = document.getElementById('tabela-estoque');
+        tabela.innerHTML = ''; // Limpa a tabela antes de adicionar
+
+        for (const codigo in estoque) {
+            const produto = estoque[codigo];
+            const linha = document.createElement('tr');
+            linha.innerHTML = `
+                <td>${codigo}</td>
+                <td>${produto.nome}</td>
+                <td>${produto.saldo}</td>
+            `;
+            tabela.appendChild(linha);
+        }
+    }
+
+    // Carrega o estoque ao abrir a página
+    carregarEstoque();
+</script>
+
+<p><a href="solicitacao_requisicoes.html">Fazer Novo Pedido</a> | <a href="requisicoes.html">Ver Requisições</a></p>
+
+</body>
+</html>
