@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisições Pendentes</title>
+    <style>
+        .bot .but {
+            color: #8b0000;
+            outline: none;
+            text-decoration: none;
+        }
+
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #8b0000;
+            text-align: center;
+            font-size: 60px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #8b0000; /* Vinho */
+            color: white;
+        }
+        button {
+            background: #8b0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkslategray;
+        }
+        .foto-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .foto-container img {
+            width: 100px; /* Limitar o tamanho das imagens */
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Requisições Pendentes</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Código do Produto</th>
+            <th>Nome do Produto</th>
+            <th>Quantidade</th>
+            <th>Solicitante</th>
+            <th>Data e Hora</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="pendenciasBody">
+        <!-- As requisições pendentes serão inseridas aqui -->
+    </tbody>
+</table>
+
+<script>
+    // Função para renderizar a tabela de requisições pendentes
+    function renderizarPendencias() {
+        const pendenciasBody = document.getElementById('pendenciasBody');
+        const requisicoesPendentes = JSON.parse(localStorage.getItem('requisicoes')) || [];
+        
+        pendenciasBody.innerHTML = ''; // Limpa a tabela antes de adicionar
+
+        requisicoesPendentes.forEach(requisicao => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${requisicao.numero}</td>
+                <td>${requisicao.codigo}</td>
+                <td>${requisicao.nome}</td>
+                <td>${requisicao.quantidade}</td>
+                <td>${requisicao.solicitante}</td>
+                <td>${requisicao.dataHora}</td>
+                <td>
+                    <button onclick="verSaldo('${requisicao.codigo}')">Ver Saldo</button>
+                    <button onclick="tirarFoto(${requisicao.numero})">Tirar Foto</button>
+                    <button onclick="darBaixa(${requisicao.numero})">Dar Baixa</button>
+                </td>
+            `;
+            pendenciasBody.appendChild(tr);
+        });
+    }
+
+    // Função para visualizar o saldo do produto
+    function verSaldo(codigoProduto) {
+        const estoque = {
+            '004337': { nome: 'Parafuso 8x20', saldo: 10000 },
+            '004088': { nome: 'Porca m10', saldo: 50 },
+            '004087': { nome: 'Porca m8', saldo: 75 },
+            '004558': { nome: 'Parafuso 10x25', saldo: 25000 },
+        };
+
+        const produto = estoque[codigoProduto];
+        if (produto) {
+            alert(`Saldo do ${produto.nome}: ${produto.saldo}`);
+        } else {
+            alert('Produto não encontrado.');
+        }
+    }
+
+    // Função para tirar uma foto e armazená-la
+    function tirarFoto(numero) {
+        const fotoInput = document.createElement('input');
+        fotoInput.type = 'file';
+        fotoInput.accept = 'image/*';
+        fotoInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Salvar foto no localStorage
+                    let fotosRequisicao = JSON.parse(localStorage.getItem('fotosRequisicao')) || {};
+                    if (!fotosRequisicao[numero]) {
+                        fotosRequisicao[numero] = [];
+                    }
+                    fotosRequisicao[numero].push(e.target.result);
+                    localStorage.setItem('fotosRequisicao', JSON.stringify(fotosRequisicao));
+
+                    alert('Foto enviada com sucesso!');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        fotoInput.click();
+    }
+
+    // Função para dar baixa na requisição
+    function darBaixa(numero) {
+        const requisicoesPendentes = JSON.parse(localStorage.getItem('requisicoes')) || [];
+        const novaBaixa = requisicoesPendentes.find(req => req.numero === numero);
+
+        if (novaBaixa) {
+            // Remover da lista de pendentes
+            const index = requisicoesPendentes.indexOf(novaBaixa);
+            requisicoesPendentes.splice(index, 1);
+            localStorage.setItem('requisicoes', JSON.stringify(requisicoesPendentes));
+
+            // Adiciona a requisição na lista de baixas
+            let requisicoesBaixadas = JSON.parse(localStorage.getItem('requisicoesBaixadas')) || [];
+            novaBaixa.responsavel = prompt("Digite seu nome para registro da baixa:");
+            requisicoesBaixadas.push(novaBaixa);
+            localStorage.setItem('requisicoesBaixadas', JSON.stringify(requisicoesBaixadas));
+
+            alert('Baixa realizada com sucesso!');
+            renderizarPendencias(); // Atualiza a tabela
+        }
+    }
+
+    // Inicializa a tabela de pendências
+    renderizarPendencias();
+</script>
+ <div class="bot">
+    <a href="solicitacao_requisicoes.html"><button>solicitar requisicao</button></a>
+    <a href="requisicoes_baixadas.html"><button>requisicoes baixadas</button></a>
+
+
+
+</body>
+</html>

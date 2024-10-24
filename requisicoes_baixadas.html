@@ -8,95 +8,89 @@
 </head>
 <body>
 
-    <h1>Requisições com Baixa Realizada</h1>
-  
+<h1>Requisições com Baixa Realizada</h1>
 
-    <input type="text" id="searchCodigo" placeholder="Buscar por código">
-    <button id="searchBtn">Buscar</button>
+<input type="text" id="searchCodigo" placeholder="Buscar por código">
+<button id="searchBtn">Buscar</button>
 
-   <a href="requisicoes.html"> <button class="voltar" type="button">requisicoes</button></a>
+<a href="requisicoes.html"> <button class="voltar" type="button">Requisições</button></a>
 
-    <table>
-        <thead>
-            <tr>
-                <th>codigo</th>
-                <th>Código produto</th>
-                <th>Nome</th>
-                <th>Data/Hora</th>
-                <th>Transferência</th>
-                <th>Solicitante</th>
-                <th>Responsável</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="baixasBody">
-            <!-- As requisições baixadas aparecerão aqui -->
-        </tbody>
-    </table>
+<table>
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Código Produto</th>
+            <th>Nome</th>
+            <th>Data/Hora</th>
+            <th>Transferência</th>
+            <th>Solicitante</th>
+            <th>Responsável</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="baixasBody">
+        <!-- As requisições baixadas aparecerão aqui -->
+    </tbody>
+</table>
 
-    <!-- Modal para visualizar foto -->
-    <div id="viewPhotoModal" class="modal">
-        <div class="modal-content">
-            <h2>Foto da Requisição</h2>
-            <img id="viewPhoto" alt="Foto da requisição">
-            <button onclick="document.getElementById('viewPhotoModal').style.display='none'">Fechar</button>
-        </div>
-    </div>
+<script>
+    let requisicoesBaixadas = JSON.parse(localStorage.getItem('requisicoesBaixadas')) || [];
+    let fotosRequisicao = JSON.parse(localStorage.getItem('fotosRequisicao')) || {};
 
-    <script>
-
-
-
-        let requisicoesBaixadas = JSON.parse(localStorage.getItem('requisicoesBaixadas')) || [];
-
-        // Função para renderizar a tabela de requisições baixadas
-        function renderizarTabela(requisicoesFiltradas = requisicoesBaixadas) {
-            const tbody = document.getElementById('baixasBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            requisicoesFiltradas.forEach(requisicao => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${requisicao.numero}</td>
-                    <td>${requisicao.codigo}</td>
-                    <td>${requisicao.nome}</td>
-                    <td>${requisicao.dataHora}</td>
-                    <td>${requisicao.transferencia}</td>
-                    <td>${requisicao.solicitante}</td>
-                    <td>${requisicao.responsavel}</td>
-                    <td>
-                        <button onclick="verFoto('${requisicao.foto}')">Ver Foto</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Função para visualizar a foto
-        function verFoto(fotoUrl) {
-            if (fotoUrl) {
-                const viewPhotoModal = document.getElementById('viewPhotoModal');
-                document.getElementById('viewPhoto').src = fotoUrl;
-                viewPhotoModal.style.display = 'block';
-            } else {
-                alert('Nenhuma foto disponível para esta requisição.');
-            }
-        }
-
-        // Função para buscar requisições por código
-        document.getElementById('searchBtn').addEventListener('click', function () {
-            const searchValue = document.getElementById('searchCodigo').value.toLowerCase();
-            const requisicoesFiltradas = requisicoesBaixadas.filter(req =>
-                req.codigo.toLowerCase().includes(searchValue) || req.nome.toLowerCase().includes(searchValue)
-            );
-            renderizarTabela(requisicoesFiltradas);
+    // Função para renderizar a tabela de requisições baixadas
+    function renderizarTabela(requisicoesFiltradas = requisicoesBaixadas) {
+        const tbody = document.getElementById('baixasBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        requisicoesFiltradas.forEach(requisicao => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${requisicao.numero}</td>
+                <td>${requisicao.codigo}</td>
+                <td>${requisicao.nome}</td>
+                <td>${requisicao.dataHora}</td>
+                <td>${requisicao.transferencia}</td>
+                <td>${requisicao.solicitante}</td>
+                <td>${requisicao.responsavel}</td>
+                <td>
+                    <button onclick="verFotos(${requisicao.numero})">📷 Ver Fotos</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
+    }
 
-        // Inicializar a tabela de requisições baixadas
-        renderizarTabela();
-    </script>
+    // Função para visualizar fotos da requisição baixada
+    function verFotos(numero) {
+        const fotos = fotosRequisicao[numero] || [];
+        if (fotos.length > 0) {
+            const modal = document.createElement('div');
+            modal.classList.add('modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2>Fotos da Requisição</h2>
+                    ${fotos.map(foto => `<img src="${foto}" alt="Foto da Requisição" style="width: 100px; margin: 10px;">`).join('')}
+                    <button onclick="document.body.removeChild(modal)">Fechar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        } else {
+            alert('Nenhuma foto disponível para esta requisição.');
+        }
+    }
+
+    // Função para buscar requisições por código
+    document.getElementById('searchBtn').addEventListener('click', function () {
+        const searchValue = document.getElementById('searchCodigo').value.toLowerCase();
+        const requisicoesFiltradas = requisicoesBaixadas.filter(req =>
+            req.codigo.toLowerCase().includes(searchValue) || req.nome.toLowerCase().includes(searchValue)
+        );
+        renderizarTabela(requisicoesFiltradas);
+    });
+
+    // Inicializar a tabela de requisições baixadas
+    renderizarTabela();
+</script>
+
 </body>
-
-<script src="scripts_baixas.js"></script>
-<script src="scripts.js"></script>
 </html>
